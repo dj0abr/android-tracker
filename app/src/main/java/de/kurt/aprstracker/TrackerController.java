@@ -124,7 +124,7 @@ final class TrackerController
                 if (state.bluetoothPermission && adapter != null && adapter.isEnabled())
                 {
                     BluetoothDevice device = adapter.getRemoteDevice(
-                        association.getDeviceMacAddress().toString());
+                        association.getDeviceMacAddress().toByteArray());
                     state.connected = device.isConnected(BluetoothDevice.TRANSPORT_BREDR);
                 }
             }

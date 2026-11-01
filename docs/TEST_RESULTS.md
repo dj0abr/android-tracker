@@ -23,7 +23,7 @@
 
 Die Gradle-Version bleibt bewusst zur dokumentierten AGP-Kompatibilität festgelegt. GPS ist für diesen Tracker erforderlich. AGP gibt außerdem einen Build-Hinweis zur künftigen Entfernung von `android.builtInKotlin=false` in AGP 10 aus; der Java-Build mit AGP 9.2 ist erfolgreich.
 
-APK: `app/build/outputs/apk/debug/app-debug.apk`, 92241 Bytes.
+Erste APK vor der unten beschriebenen Adresskorrektur: `app/build/outputs/apk/debug/app-debug.apk`, 92241 Bytes.
 SHA-256: `b392671a48b6647faa31baee3f6698264d735826ba68606babe028e947676ebf`.
 
 ## Pixel-Gerätetest per USB
@@ -46,8 +46,34 @@ Lokale, nicht eingecheckte Artefakte einschließlich Screenshot, Geräte-Fingerp
 
 Beim ersten Versuch nach Wiederverbinden war die APK bereits installiert, bevor das Testskript an der Datumsabfrage abbrach: ADB hatte das Datumsformat mit Leerzeichen ohne ausreichende Remote-Shell-Quotierung übergeben. Die Quotierung wurde korrigiert, `bash -n` besteht, und der anschließende vollständige Durchlauf war erfolgreich.
 
-Die App bleibt geöffnet, die Automatik ist aus. Berechtigungen und Auto-Zuordnung wurden nicht per ADB erzwungen. Der beobachtete inaktive Dienst ist ein Nachweis für den sicheren Anfangszustand und die fehlende Zuordnung; die physische Bluetooth-/Qi-Kombination wurde dadurch noch nicht geprüft.
+Zustand nach diesem Basistest: App geöffnet, Automatik aus. Berechtigungen und Auto-Zuordnung wurden nicht per ADB erzwungen. Der beobachtete inaktive Dienst ist ein Nachweis für den sicheren Anfangszustand und die fehlende Zuordnung; die physische Bluetooth-/Qi-Kombination wurde dadurch noch nicht geprüft.
+
+## Einrichtung und Korrektur des Bluetooth-Status
+
+Die Einrichtung wurde anschließend vom Nutzer über die Android-Oberfläche abgeschlossen. Auf dem Pixel geprüft:
+
+- Präziser und grober Standort, Hintergrundstandort, Bluetooth und Benachrichtigungen: alle erteilt.
+- Auto „Kurt BMW NA05“ über CompanionDeviceManager zugeordnet; Presence-Beobachtung aktiv, Zuordnung gültig.
+- Automatik eingeschaltet und zugehörige Association-ID gespeichert.
+
+Das Auslesen der tatsächlichen Verbindung deckte einen Fehler auf: `MacAddress.toString()` liefert eine kleingeschriebene Adresse, die `BluetoothAdapter.getRemoteDevice(String)` auf dem Pixel ablehnt. Die Adresse wird nun mit `MacAddress.toByteArray()` direkt an `getRemoteDevice(byte[])` übergeben. Die Oberfläche war zuvor trotz abgefangener Ausnahme bedienbar; die Verbindungserkennung hätte damit aber nicht funktioniert.
+
+Nach der Korrektur erfolgreich ausgeführt: `./gradlew assembleDebug testDebugUnitTest lintDebug` (6 Tests, keine Lint-Fehler), Installation per Update und erneuter Pixel-Smoke-Test. Berechtigungen, Auto-Zuordnung und eingeschaltete Automatik blieben erhalten. Logcat bestätigt nun vollständig gelesene Systemzustände: `enabled=true associated=true bt=false wireless=false plugged=2 fine=true background=true gpsEnabled=true gate=DISCONNECTED`, ohne MAC-Adressfehler.
+
+Zusätzlich beobachtet: `MY_PACKAGE_REPLACED` → erneute Presence-Registrierung nach dem APK-Update. Das bestätigt diesen Wiederherstellungspfad; ein echter Boot-Test steht weiterhin aus.
+
+Artefakte: `app/build/device-tests/20261101-231336-setup/` und `app/build/device-tests/20261101-231433/`.
+
+## Vorbereiteter Test ohne USB
+
+Am 1. November 2026 um 23:14 Uhr (Europe/Berlin) wurde die Activity in den Hintergrund gelegt und der inaktive Tracker-Prozess mit `am kill` beendet. Es wurde kein Force-Stop verwendet. Der Prozess ist danach nicht mehr vorhanden; die gültige Companion-Zuordnung mit aktivierter Presence-Beobachtung bleibt im System bestehen. Damit ist der nächste physische Verbindungsaufbau ein Test des unbeaufsichtigten Starts aus einem beendeten App-Prozess.
+
+Für diesen einzelnen Gerätetest läuft ein vom APK unabhängiger `logcat`-Prozess unter der ADB-Shell. Er zeichnet nur `AprsTracker` und `AndroidRuntime` in temporäre Dateien auf dem Pixel auf, auch nach Abziehen von USB. Rotation begrenzt die Dateien auf insgesamt ungefähr 3 MiB. Metadaten zum gezielten Einsammeln und Beenden: `app/build/device-tests/20261101-231456-field/recorder.json`. Nach Rückkehr die Aufzeichnung beenden, Dateien lokal auswerten und vom Gerät entfernen. Keine Koordinaten in Git übernehmen.
+
+Testablauf: Tracker im Hintergrund lassen; im stehenden Auto Bluetooth verbinden; Pixel zwei Minuten auf Qi legen und Bildschirm sperren; für 20 Sekunden vom Lader nehmen; erneut eine Minute auflegen; vom Lader nehmen und wieder am Rechner per USB anschließen. Start, GPS-Fixes, Stoppen und erneuter Start sind erst nach Auswertung der Aufzeichnung nachgewiesen.
 
 ## Noch offene Hardware-Abnahme
 
-Offen sind die Einrichtung über die Android-Berechtigungs-/Companion-Dialoge, die echte Auto-Zuordnung, beide Reihenfolgen von Bluetooth/Qi, echte GPS-Fixes, Start ohne sichtbare Activity/bei gesperrtem Bildschirm, Stoppen bei Wegfall einer Bedingung, Prozessverlust, Neustart sowie Parallelbetrieb mit Browser/Android Auto. Benötigt werden dafür die erreichbare Freisprecheinrichtung und der Qi-Lader. Diese Punkte sind **noch nicht als erfolgreich getestet** zu betrachten. Vollständiger Ablauf: [DEVICE_TEST.md](DEVICE_TEST.md).
+Die Einrichtung einschließlich echter Auto-Zuordnung ist bestätigt. Noch offen sind die physische Verbindung zum Auto, beide Reihenfolgen von Bluetooth/Qi, echte GPS-Fixes, Start ohne sichtbare Activity/bei gesperrtem Bildschirm, Stoppen bei Wegfall einer Bedingung, Wiederanlauf nach Prozessverlust während aktiven Trackings, Neustart sowie Parallelbetrieb mit Browser/Android Auto. Benötigt werden dafür die erreichbare Freisprecheinrichtung und der Qi-Lader. Diese Punkte sind **noch nicht als erfolgreich getestet** zu betrachten. Vollständiger Ablauf: [DEVICE_TEST.md](DEVICE_TEST.md).
+
+Aktuelle APK nach Adresskorrektur: 92297 Bytes; SHA-256: `5b5ad76ce8d6ffc980cc5970c291428ed1c146ea3e3c40079fe302108725b9b6`.
