@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">APRS Tracker · Funktionstest</string>
+    <string name="intro">GPS startet automatisch, wenn das ausgewählte Auto per Bluetooth Classic verbunden ist und das Telefon kabellos lädt. Einmalig Berechtigungen erteilen und das Auto zuordnen.</string>
+    <string name="permissions">1. Berechtigungen erteilen</string>
+    <string name="background">2. Standort „Immer zulassen“ einrichten</string>
+    <string name="choose_car">3. Auto-Bluetooth auswählen</string>
+    <string name="enabled">Automatik aktivieren</string>
+    <string name="refresh">Status prüfen</string>
+    <string name="app_settings">Android-App-Einstellungen</string>
+    <string name="test_note">Erster Funktionstest: Zustandswechsel und GPS-Positionen erscheinen in Logcat unter AprsTracker. Noch keine APRS-IS-Verbindung. Die laufende Standort-Benachrichtigung ist für Android erforderlich.</string>
+    <string name="background_title">Standort im Hintergrund</string>
+    <string name="background_explanation">Damit GPS bei gesperrtem Bildschirm ohne Öffnen der App starten kann, benötigt der Tracker die Standortfreigabe „%1$s“. Öffne in den App-Einstellungen „Berechtigungen → Standort“ und wähle diese Option. Präzisen Standort ebenfalls erlauben. GPS wird nur bei Auto-Verbindung und kabelloser Versorgung angefordert.</string>
+    <string name="open_settings">Einstellungen öffnen</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="need_permissions">Zuerst Bluetooth und präzisen Standort erlauben. Bei abgelehnten Berechtigungen die Android-App-Einstellungen verwenden.</string>
+    <string name="no_bonded_devices">Noch kein Bluetooth-Gerät gekoppelt. Zuerst die Freisprecheinrichtung in den Android-Bluetooth-Einstellungen koppeln.</string>
+    <string name="select_car_title">Gekoppelte Freisprecheinrichtung</string>
+    <string name="association_failed">Auto-Zuordnung fehlgeschlagen: %1$s</string>
+    <string name="channel_name">GPS während der Autofahrt</string>
+    <string name="notification_title">GPS-Funktionstest aktiv</string>
+    <string name="notification_text">Auto verbunden · kabellose Versorgung · Positionen in Logcat</string>
+    <string name="unknown_device">Unbenanntes Gerät</string>
+    <string name="yes">ja</string>
+    <string name="no">nein</string>
+    <string name="status_format">Auto: %1$s\nZuordnung: %2$s\nBluetooth Classic verbunden: %3$s\nKabellose Versorgung: %4$s\nPräziser Standort: %5$s\nStandort immer: %6$s\nGPS eingeschaltet: %7$s\nBenachrichtigungen: %8$s\nGPS-Dienst: %9$s\nStatus: %10$s\nDiagnose: %11$s</string>
+    <string name="no_car">noch nicht ausgewählt</string>
+    <string name="running">läuft</string>
+    <string name="stopped">gestoppt</string>
+    <string name="none">keine</string>
+    <string name="gate_disabled">Automatik ausgeschaltet</string>
+    <string name="gate_no_association">Auto-Zuordnung fehlt</string>
+    <string name="gate_bluetooth_permission">Bluetooth-Berechtigung fehlt</string>
+    <string name="gate_disconnected">Warte auf Auto-Verbindung</string>
+    <string name="gate_not_wireless">Warte auf kabellose Versorgung</string>
+    <string name="gate_fine_permission">Präziser Standort fehlt</string>
+    <string name="gate_background_permission">Standort „Immer zulassen“ fehlt</string>
+    <string name="gate_location_disabled">GPS/Standort ist ausgeschaltet</string>
+    <string name="gate_ready">Bedingungen für GPS erfüllt</string>
+</resources>
