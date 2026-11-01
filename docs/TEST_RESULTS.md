@@ -103,8 +103,14 @@ Damit sind der **erste Hintergrundstart nach zuvor beendetem Prozess**, **Blueto
 
 Artefakte: `app/build/device-tests/20261101-231456-field/` mit Rohaufzeichnung, `summary.json`, Prüfsummen und abschließenden Systemzuständen. Die 8-KiB-Aufzeichnung enthält eine unvollständige letzte Zeile um 23:22:02; alle oben genannten Start-/Stoppereignisse und 36 Positionen sind vollständig enthalten. Ein späterer Bluetooth-Trennzeitpunkt ist daraus nicht nachgewiesen. Nach Sicherung wurden die Geräte- und lokalen Prüfsummen verglichen, der temporäre Recorder beendet und seine Datei vom Pixel entfernt. Die Rohdatei mit Koordinaten bleibt ausschließlich lokal und wird nicht eingecheckt.
 
+## Parallelbetrieb mit Android Auto
+
+Der Nutzer bestätigte nach dem Feldtest, dass Android Auto während des Bluetooth-/Qi-/GPS-Tests parallel lief und aktiv bedient wurde. Dabei bemerkte er keine Beeinträchtigung. Zusammen mit den aufgezeichneten GPS-Starts, Positionen und Stopps bestätigt dies den unauffälligen Parallelbetrieb in diesem konkreten Praxistest.
+
+Nachweisquelle für Bedienbarkeit und fehlende wahrgenommene Störung ist die Nutzerrückmeldung; eine separate instrumentierte Messung von Audio-Fokus, Anzeige oder Android-Auto-Latenz wurde nicht durchgeführt. Langzeitbetrieb und ein eigener Browser-Test bleiben offen.
+
 ## Noch offene Hardware-Abnahme
 
-Der beschriebene erste Auto-/Qi-Kernfunktionstest ist bestanden. Noch separat zu prüfen sind die umgekehrte Startreihenfolge (zuerst Qi, dann Auto-Verbindung), Bluetooth-Trennung bei weiter aktiver Qi-Ladung, Wiederanlauf nach Prozessverlust während aktiven Trackings, ein echter Geräteneustart, Langzeitbetrieb, die übrigen Berechtigungs-/Ladezustands-Grenzfälle sowie Parallelbetrieb mit Browser/Android Auto. Der Hintergrundstart wurde mit zuvor beendeter App getestet; der Sperrzustand des Bildschirms wurde im Logger nicht separat erfasst. Diese zusätzlichen Punkte sind **noch nicht als erfolgreich getestet** zu betrachten. Vollständiger Ablauf: [DEVICE_TEST.md](DEVICE_TEST.md).
+Der beschriebene erste Auto-/Qi-Kernfunktionstest ist bestanden. Noch separat zu prüfen sind die umgekehrte Startreihenfolge (zuerst Qi, dann Auto-Verbindung), Bluetooth-Trennung bei weiter aktiver Qi-Ladung, Wiederanlauf nach Prozessverlust während aktiven Trackings, ein echter Geräteneustart, Langzeitbetrieb, die übrigen Berechtigungs-/Ladezustands-Grenzfälle sowie ein eigener Paralleltest mit dem Browser. Android Auto lief im beschriebenen Feldtest nach Nutzerrückmeldung ohne bemerkte Beeinträchtigung parallel. Der Hintergrundstart wurde mit zuvor beendeter App getestet; der Sperrzustand des Bildschirms wurde im Logger nicht separat erfasst. Diese zusätzlichen Punkte sind **noch nicht als erfolgreich getestet** zu betrachten. Vollständiger Ablauf: [DEVICE_TEST.md](DEVICE_TEST.md).
 
 Aktuelle APK nach Adresskorrektur: 92297 Bytes; SHA-256: `5b5ad76ce8d6ffc980cc5970c291428ed1c146ea3e3c40079fe302108725b9b6`.
