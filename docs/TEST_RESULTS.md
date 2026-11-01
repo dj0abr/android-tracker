@@ -72,8 +72,39 @@ Für diesen einzelnen Gerätetest läuft ein vom APK unabhängiger `logcat`-Proz
 
 Testablauf: Tracker im Hintergrund lassen; im stehenden Auto Bluetooth verbinden; Pixel zwei Minuten auf Qi legen und Bildschirm sperren; für 20 Sekunden vom Lader nehmen; erneut eine Minute auflegen; vom Lader nehmen und wieder am Rechner per USB anschließen. Start, GPS-Fixes, Stoppen und erneuter Start sind erst nach Auswertung der Aufzeichnung nachgewiesen.
 
+## Ausgewerteter Auto-/Qi-Test ohne USB
+
+Am 1. November 2026, Zeiten in Europe/Berlin. Der Nutzer führte den Test im Auto ohne USB-Verbindung durch und meldete Schwierigkeiten beim Positionieren auf dem Qi-Lader. Die vom Pixel aufgezeichneten Zustandswechsel sind trotzdem für den Kernfunktionstest auswertbar.
+
+Die App war vor dem Test im Hintergrund und ihr Prozess beendet. Bei Bluetooth-Ereignissen lief sie in einem neuen Prozess wieder an; keine Tracker-Activity musste für den GPS-Start geöffnet werden. Die folgende Sequenz ist in den gesicherten Logs nachgewiesen:
+
+| Uhrzeit | Beobachtung |
+| --- | --- |
+| 23:16:23.322 | Neuer App-Prozess startet bei Bluetooth-Ereignissen; ausgewähltes Auto noch nicht als Classic-Verbindung verbunden; GPS bleibt aus |
+| 23:17:28.716 | BLE-Presence (`event=0`); kein GPS-Start |
+| 23:17:39.736 | Classic-Verbindung des ausgewählten Autos (`event=2`); `bt=true`, ohne kabellose Ladung weiterhin kein GPS |
+| 23:17:50.638 | Kabellose Ladung erkannt (`plugged=4`, `batteryStatus=2`), Gate `READY` |
+| 23:17:50.684 | Location-FGS/GPS automatisch gestartet; kein abgewiesener Hintergrundstart |
+| 23:17:59.848 | Erste echte GPS-Position, `mock=false`, rund 9,2 Sekunden nach Dienststart |
+| 23:20:35.076 | Android meldet keine aktive Ladung mehr (`batteryStatus=4`), trotz zunächst noch gesetztem Wireless-Bit |
+| 23:20:35.098 | GPS-Listener entfernt und Dienst beendet, 22 ms nach verarbeitetem Zustandswechsel |
+| 23:20:37.251 | Wireless-Stromquelle ebenfalls weg (`plugged=0`); GPS bleibt aus |
+| 23:21:24.651 | Erneut kabellose Ladung und Gate `READY` |
+| 23:21:24.701 | Zweiter automatischer GPS-Start |
+| 23:21:25.288 | Erneut echte GPS-Position, rund 0,6 Sekunden nach Dienststart |
+| 23:21:46.295 | Android meldet erneut keine aktive Ladung (`batteryStatus=4`) |
+| 23:21:46.312 | Zweiter GPS-Stopp mit Listener-Freigabe, nach 17 ms |
+
+Erste GPS-Phase: **31 Positionsmeldungen in rund 2:44 Minuten**. Zweite GPS-Phase: **5 Positionsmeldungen in rund 22 Sekunden**. Insgesamt **36 echte, nicht simulierte Positionsmeldungen**, typische Folgezeit rund **5 Sekunden**. Die von Android gemeldete Genauigkeit verbessert sich in der ersten Phase von zunächst 113,8 m bis auf 9,4 m. Das ist eine Genauigkeitsschätzung des Empfängers, kein Vermessungsnachweis.
+
+Zwischen den beiden Dienstphasen sind keine GPS-Positionszeilen aufgezeichnet. Keine Tracker-Fehler/FGS-Startausnahmen in der gesicherten Feldaufzeichnung und kein Tracker-Absturz im ausgelesenen Crash-Buffer. Nach Rückkehr am USB-Kabel sind weder Standort- noch Companion-Service aktiv; die Automatik und Presence-Zuordnung bleiben eingerichtet.
+
+Damit sind der **erste Hintergrundstart nach zuvor beendetem Prozess**, **Bluetooth-Classic-Erkennung**, **Abgrenzung gegenüber bloßer BLE-Nähe**, **kabellose Ladeerkennung**, **echte GPS-Updates**, **Stoppen bei Ladeunterbrechung** und **erneuter automatischer Start** auf dem Pixel nachgewiesen. Die Ursache der Ladeunterbrechungen selbst lässt sich aus `BatteryManager` nicht bestimmen; die App reagiert auf den vom System gemeldeten Zustand.
+
+Artefakte: `app/build/device-tests/20261101-231456-field/` mit Rohaufzeichnung, `summary.json`, Prüfsummen und abschließenden Systemzuständen. Die 8-KiB-Aufzeichnung enthält eine unvollständige letzte Zeile um 23:22:02; alle oben genannten Start-/Stoppereignisse und 36 Positionen sind vollständig enthalten. Ein späterer Bluetooth-Trennzeitpunkt ist daraus nicht nachgewiesen. Nach Sicherung wurden die Geräte- und lokalen Prüfsummen verglichen, der temporäre Recorder beendet und seine Datei vom Pixel entfernt. Die Rohdatei mit Koordinaten bleibt ausschließlich lokal und wird nicht eingecheckt.
+
 ## Noch offene Hardware-Abnahme
 
-Die Einrichtung einschließlich echter Auto-Zuordnung ist bestätigt. Noch offen sind die physische Verbindung zum Auto, beide Reihenfolgen von Bluetooth/Qi, echte GPS-Fixes, Start ohne sichtbare Activity/bei gesperrtem Bildschirm, Stoppen bei Wegfall einer Bedingung, Wiederanlauf nach Prozessverlust während aktiven Trackings, Neustart sowie Parallelbetrieb mit Browser/Android Auto. Benötigt werden dafür die erreichbare Freisprecheinrichtung und der Qi-Lader. Diese Punkte sind **noch nicht als erfolgreich getestet** zu betrachten. Vollständiger Ablauf: [DEVICE_TEST.md](DEVICE_TEST.md).
+Der beschriebene erste Auto-/Qi-Kernfunktionstest ist bestanden. Noch separat zu prüfen sind die umgekehrte Startreihenfolge (zuerst Qi, dann Auto-Verbindung), Bluetooth-Trennung bei weiter aktiver Qi-Ladung, Wiederanlauf nach Prozessverlust während aktiven Trackings, ein echter Geräteneustart, Langzeitbetrieb, die übrigen Berechtigungs-/Ladezustands-Grenzfälle sowie Parallelbetrieb mit Browser/Android Auto. Der Hintergrundstart wurde mit zuvor beendeter App getestet; der Sperrzustand des Bildschirms wurde im Logger nicht separat erfasst. Diese zusätzlichen Punkte sind **noch nicht als erfolgreich getestet** zu betrachten. Vollständiger Ablauf: [DEVICE_TEST.md](DEVICE_TEST.md).
 
 Aktuelle APK nach Adresskorrektur: 92297 Bytes; SHA-256: `5b5ad76ce8d6ffc980cc5970c291428ed1c146ea3e3c40079fe302108725b9b6`.
