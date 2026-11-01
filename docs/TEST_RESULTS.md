@@ -109,8 +109,26 @@ Der Nutzer bestätigte nach dem Feldtest, dass Android Auto während des Bluetoo
 
 Nachweisquelle für Bedienbarkeit und fehlende wahrgenommene Störung ist die Nutzerrückmeldung; eine separate instrumentierte Messung von Audio-Fokus, Anzeige oder Android-Auto-Latenz wurde nicht durchgeführt. Langzeitbetrieb und ein eigener Browser-Test bleiben offen.
 
+## Echter Geräteneustart mit USB-Verbindung
+
+Der Nutzer schaltete das Pixel vollständig aus, wieder ein und entsperrte es anschließend. Die Tracker-App sollte dabei geschlossen bleiben und wurde für die ADB-Prüfung nicht geöffnet. Vergleich mit den unmittelbar vor dem Ausschalten gesicherten Daten:
+
+| Prüfung | Tatsächliches Ergebnis |
+| --- | --- |
+| Echter Neustart | Kernel-Boot-ID geändert und Systemlaufzeit gegenüber dem Ausgangszustand zurückgesetzt; `sys.boot_completed=1` |
+| Boot-Empfänger | Um 23:43:25.555 Uhr am 1. November 2026 (Europe/Berlin) `RECOVERY android.intent.action.BOOT_COMPLETED` im Tracker-Log |
+| Automatische Wiederherstellung | Direkt danach `PRESENCE observation=true association=3`; keine Tracker-Activity für die Prüfung geöffnet |
+| Aktuelle Bedingungen | `enabled=true associated=true bt=false wireless=false plugged=2 fine=true background=true gpsEnabled=true gate=DISCONNECTED` |
+| Gespeicherte Einrichtung | Automatik eingeschaltet; ausgewählte Auto-Zuordnung unverändert; gültige Companion-Zuordnung mit `mNotifyOnDeviceNearby=true` |
+| Berechtigungen | Präziser Standort, Hintergrundstandort, Bluetooth und Benachrichtigungen weiterhin erteilt |
+| Betrieb außerhalb des Autos | Kein Standort- oder Companion-Service aktiv; Tracker ist nicht im Vordergrund |
+
+Die **Wiederherstellung der Automatik und Gerätebeobachtung nach echtem Aus-/Einschalten und erstem Entsperren ist damit bestätigt**. GPS blieb ohne Auto-Verbindung und Qi-Ladung richtigerweise aus. Ein anschließender erneuter GPS-Start im Auto nach genau diesem Neustart wurde noch nicht separat durchgeführt.
+
+Testartefakte: `app/build/device-tests/20261101-233007-reboot/`. Die Boot-Zeilen wurden beim ersten ADB-Logabruf tatsächlich gelesen und als wörtliche Übernahme dieses Tool-Ergebnisses separat gespeichert (`boot-lines-from-first-adb-tool-output.txt`). Bei einem späteren Logabruf waren sie nicht mehr enthalten; dieser Abruf ist getrennt gespeichert. Der ausgelesene Main-Logpuffer ist auf 256 KiB begrenzt. Boot-ID-/Laufzeitvergleich, aktuelle Einstellungen, Freigaben und Systemregistrierung wurden zusätzlich direkt in Dateien gesichert. Kein Boot-Broadcast wurde simuliert und kein manueller Service-Start ausgeführt.
+
 ## Noch offene Hardware-Abnahme
 
-Der beschriebene erste Auto-/Qi-Kernfunktionstest ist bestanden. Noch separat zu prüfen sind die umgekehrte Startreihenfolge (zuerst Qi, dann Auto-Verbindung), Bluetooth-Trennung bei weiter aktiver Qi-Ladung, Wiederanlauf nach Prozessverlust während aktiven Trackings, ein echter Geräteneustart, Langzeitbetrieb, die übrigen Berechtigungs-/Ladezustands-Grenzfälle sowie ein eigener Paralleltest mit dem Browser. Android Auto lief im beschriebenen Feldtest nach Nutzerrückmeldung ohne bemerkte Beeinträchtigung parallel. Der Hintergrundstart wurde mit zuvor beendeter App getestet; der Sperrzustand des Bildschirms wurde im Logger nicht separat erfasst. Diese zusätzlichen Punkte sind **noch nicht als erfolgreich getestet** zu betrachten. Vollständiger Ablauf: [DEVICE_TEST.md](DEVICE_TEST.md).
+Der beschriebene erste Auto-/Qi-Kernfunktionstest ist bestanden. Noch separat zu prüfen sind die umgekehrte Startreihenfolge (zuerst Qi, dann Auto-Verbindung), Bluetooth-Trennung bei weiter aktiver Qi-Ladung, Wiederanlauf nach Prozessverlust während aktiven Trackings, erneuter GPS-Start im Auto im Anschluss an den jetzt geprüften Geräteneustart, Langzeitbetrieb, die übrigen Berechtigungs-/Ladezustands-Grenzfälle sowie ein eigener Paralleltest mit dem Browser. Android Auto lief im beschriebenen Feldtest nach Nutzerrückmeldung ohne bemerkte Beeinträchtigung parallel. Der Hintergrundstart wurde mit zuvor beendeter App getestet; der Sperrzustand des Bildschirms wurde im Logger nicht separat erfasst. Diese zusätzlichen Punkte sind **noch nicht als erfolgreich getestet** zu betrachten. Vollständiger Ablauf: [DEVICE_TEST.md](DEVICE_TEST.md).
 
 Aktuelle APK nach Adresskorrektur: 92297 Bytes; SHA-256: `5b5ad76ce8d6ffc980cc5970c291428ed1c146ea3e3c40079fe302108725b9b6`.
