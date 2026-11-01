@@ -26,10 +26,28 @@ Die Gradle-Version bleibt bewusst zur dokumentierten AGP-Kompatibilität festgel
 APK: `app/build/outputs/apk/debug/app-debug.apk`, 92241 Bytes.
 SHA-256: `b392671a48b6647faa31baee3f6698264d735826ba68606babe028e947676ebf`.
 
-## Pixel-Verbindung und offene Abnahme
+## Pixel-Gerätetest per USB
 
-Zu Beginn per ADB tatsächlich erkannt: **Google Pixel 11 Pro**, Modell `Pixel_11_Pro`, Android **17**, SDK **37**. Vor dem ersten abgeschlossenen APK-Build war dieses Gerät nicht mehr in `adb devices -l` aufgeführt.
+Am 1. November 2026 um 23:08 Uhr (Europe/Berlin) auf dem wieder verbundenen **Google Pixel 11 Pro**, Modell `Pixel_11_Pro`, Android **17**, SDK **37** ausgeführt.
 
-`./scripts/pixel-smoke-test.sh` wurde versucht und endete mit Exitcode 2: kein verbundenes ADB-Gerät. Somit wurden die neue APK **noch nicht auf dem Pixel installiert** und die Activity noch nicht auf dem Gerät gestartet.
+| Prüfung | Tatsächliches Ergebnis |
+| --- | --- |
+| APK-Installation mit `adb install -r` | `Success`; installierte APK entspricht der oben genannten Prüfsumme |
+| `./scripts/pixel-smoke-test.sh` | Nach Skript-Korrektur vollständig erfolgreich, Exitcode 0 |
+| Kaltstart der Activity | `Status: ok`, `LaunchState: COLD`, `TotalTime: 228 ms` |
+| Prozess/Crash-Log | App-Prozess läuft; Crash-Buffer seit Start enthält keinen Tracker-Absturz |
+| Oberfläche | Screenshot visuell geprüft: Einrichtungsschritte, Automatikschalter und mehrzeiliger Status korrekt sichtbar; Inhalt scrollbar |
+| Tatsächliche Ladequelle | Android meldet USB=true, Wireless=false; Logcat `plugged=2 batteryStatus=2 wireless=false` |
+| Frische Installation | Automatik aus, keine Auto-Zuordnung, keine Standortfreigaben; `gate=DISABLED`; kein GPS-/Companion-Service aktiv |
+| Automatik ohne Auto-Zuordnung eingeschaltet | UI meldet „Auto-Zuordnung fehlt“, GPS bleibt gestoppt; kein `GpsTrackingService` in `dumpsys activity services` |
+| Automatik wieder ausgeschaltet | UI meldet „Automatik ausgeschaltet“; Ausgangszustand wiederhergestellt; kein laufender Service |
 
-Weiter offen sind die physische Auto-Zuordnung, beide Reihenfolgen von Bluetooth/Qi, echte GPS-Fixes, Start ohne sichtbare Activity/bei gesperrtem Bildschirm, Stoppen bei Wegfall einer Bedingung, Prozessverlust, Neustart sowie störungsfreier Parallelbetrieb mit Browser/Android Auto. Dafür fehlen aktuell eine ADB-Verbindung und die erreichbare Freisprecheinrichtung samt Qi-Lader. Diese Punkte sind **nicht als erfolgreich getestet** zu betrachten. Vollständiger Ablauf: [DEVICE_TEST.md](DEVICE_TEST.md).
+Lokale, nicht eingecheckte Artefakte einschließlich Screenshot, Geräte-Fingerprint, Installations-/Startausgabe, Logcat und Gate-Prüfungen: `app/build/device-tests/20261101-230823/`.
+
+Beim ersten Versuch nach Wiederverbinden war die APK bereits installiert, bevor das Testskript an der Datumsabfrage abbrach: ADB hatte das Datumsformat mit Leerzeichen ohne ausreichende Remote-Shell-Quotierung übergeben. Die Quotierung wurde korrigiert, `bash -n` besteht, und der anschließende vollständige Durchlauf war erfolgreich.
+
+Die App bleibt geöffnet, die Automatik ist aus. Berechtigungen und Auto-Zuordnung wurden nicht per ADB erzwungen. Der beobachtete inaktive Dienst ist ein Nachweis für den sicheren Anfangszustand und die fehlende Zuordnung; die physische Bluetooth-/Qi-Kombination wurde dadurch noch nicht geprüft.
+
+## Noch offene Hardware-Abnahme
+
+Offen sind die Einrichtung über die Android-Berechtigungs-/Companion-Dialoge, die echte Auto-Zuordnung, beide Reihenfolgen von Bluetooth/Qi, echte GPS-Fixes, Start ohne sichtbare Activity/bei gesperrtem Bildschirm, Stoppen bei Wegfall einer Bedingung, Prozessverlust, Neustart sowie Parallelbetrieb mit Browser/Android Auto. Benötigt werden dafür die erreichbare Freisprecheinrichtung und der Qi-Lader. Diese Punkte sind **noch nicht als erfolgreich getestet** zu betrachten. Vollständiger Ablauf: [DEVICE_TEST.md](DEVICE_TEST.md).

@@ -31,7 +31,7 @@ mkdir -p "$tracker_output"
 "${tracker_device[@]}" shell getprop ro.product.model > "$tracker_output/model.txt"
 "${tracker_device[@]}" shell getprop ro.build.fingerprint > "$tracker_output/fingerprint.txt"
 "${tracker_device[@]}" install -r "$tracker_apk" | tee "$tracker_output/install.txt"
-tracker_start="$("${tracker_device[@]}" shell date '+%m-%d %H:%M:%S.000' | tr -d '\r')"
+tracker_start="$("${tracker_device[@]}" shell "date '+%m-%d %H:%M:%S.000'" | tr -d '\r')"
 "${tracker_device[@]}" shell am start -W -n de.kurt.aprstracker/.MainActivity | tee "$tracker_output/start.txt"
 sleep 2
 "${tracker_device[@]}" shell pidof de.kurt.aprstracker > "$tracker_output/pid.txt"
